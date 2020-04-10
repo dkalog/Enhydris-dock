@@ -38,17 +38,17 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y \
 
 WORKDIR /home/foo
 RUN ["git", "clone", "https://github.com/openmeteo/enhydris.git"]
-CMD git clone  https://github.com/openmeteo/enhydris.git
 WORKDIR /home/foo/enhydris
 CMD git checkout master
 
 
-RUN virtualenv --python=/usr/bin/python3 /home/foo/enhydris
+RUN virtualenv --python=/usr/bin/python3 --system-site-packages /home/foo/enhydris
 RUN /home/foo/enhydris/bin/pip install psycopg2
 RUN /home/foo/enhydris/bin/pip install gdal==2.4.0
 RUN /home/foo/enhydris/bin/pip install -r requirements.txt
 RUN /home/foo/enhydris/bin/pip install -r requirements-dev.txt
 RUN /home/foo/enhydris/bin/pip install  isort flake8 black 
+RUN /home/foo/enhydris/bin/pip install  pillow
 
 # switch USER
 USER postgres
@@ -84,6 +84,4 @@ CMD ["/usr/lib/postgresql/11/bin/postgres", "-D", "/var/lib/postgresql/11/main",
 #
 
 USER root
-RUN /home/foo/enhydris/bin/pip install  pillow
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y libfreetype6-dev python3-pil
 RUN /home/foo/enhydris/bin/python manage.py makemigrations --check
