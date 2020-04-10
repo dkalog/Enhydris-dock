@@ -1,3 +1,5 @@
+# use of an ubuntu base for simplicity and transparency
+#FROM ubuntu:18.04
 FROM python:3.7-slim-buster
 # set environment variables
 ADD VERSION .
@@ -5,8 +7,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 # getting postgres
-RUN apt-get update && apt-get -y install wget gnupg2 git \
-        virtualenv python3-virtualenv python3-pip
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y wget gnupg2 
 
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 
@@ -17,13 +18,13 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" > /etc/
 # Install software-properties-common and PostgreSQL 11
 #  and some other packages for ftp
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y \
-  wget gnupg2 git virtualenv python3-virtualenv python3-pip \
+  git virtualenv python3-virtualenv python3-pip python3-psycopg2 \
   software-properties-common \
   postgresql-11 \
   postgresql-client-11 \
   postgresql-contrib-11 \
-  postgresql-11-postgis-3 \
-  postgresql-11-postgis-3-scripts \
+  postgresql-11-postgis-2.5 \
+  postgresql-11-postgis-2.5-scripts \
   aptitude  \
   unzip \
   openssh-client \
@@ -33,16 +34,20 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y \
   && aptitude install -y nano axel wput screen p7zip-full osmium-tool \
   vnstat gdal-bin libgdal-dev \
   rm -rf /var/lib/apt/lists/*
-  
-  RUN ["git", "clone", "https://github.com/openmeteo/enhydris.git"]
+
+
+WORKDIR /home/foo
+RUN ["git", "clone", "https://github.com/openmeteo/enhydris.git"]
 CMD git clone  https://github.com/openmeteo/enhydris.git
 WORKDIR /home/foo/enhydris
 CMD git checkout master
 
 RUN virtualenv --python=/usr/bin/python3 /home/foo/enhydris
+RUN /home/foo/enhydris/bin/pip install psycopg2
 RUN /home/foo/enhydris/bin/pip install gdal==2.4.0
 RUN /home/foo/enhydris/bin/pip install -r requirements.txt
 RUN /home/foo/enhydris/bin/pip install -r requirements-dev.txt
+#RUN python3 manage.py makemigrations --check
 
 
 # switch USER
@@ -63,19 +68,16 @@ EXPOSE 5432
 # the postgis extension
 
 RUN    /etc/init.d/postgresql start &&\
-    psql --command "CREATE USER enhydris WITH SUPERUSER PASSWORD 'enhydris';" &&\
-    createdb -O enhydris enhydris &&\
-    psql -d enhydris --command "CREATE EXTENSION IF NOT EXISTS postgis;" &&\
-    psql -d enhydris --command "CREATE EXTENSION IF NOT EXISTS postgis_topology;" &&\
-    psql -d enhydris --command "CREATE EXTENSION hstore;" &&\
-    psql -d enhydris --command "CREATE SCHEMA import;"
+    psql --command "CREATE USER enhydris_user WITH SUPERUSER PASSWORD 'enhydris';" &&\
+    createdb -O enhydris_user enhydris_db &&\
+    psql -d enhydirs_user --command "CREATE EXTENSION IF NOT EXISTS postgis;" &&\
+    psql -d enhydirs_user --command "CREATE EXTENSION IF NOT EXISTS postgis_topology;" &&\
+    psql -d enhydirs_user --command "CREATE EXTENSION hstore;" &&\
+    psql -d enhydirs_user --command "CREATE SCHEMA import;"
 
 
 # Add VOLUMEs to allow backup of config, logs and databases
 VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql", "/home/osmdata/gpkg"]
 
 # Set the default command to run when starting the container
-CMD ["/usr/lib/postgresql/11/bin/postgres", "-D", "/var/lib/postgresql/11/main", "-c", "config_file=/etc/postgresql/11/main/postgresq
-l.conf"]
-
-
+CMD ["/usr/lib/postgresql/11/bin/postgres", "-D", "/var/lib/postgresql/11/main", "-c", "config_file=/etc/postgresql/11/main/postgresql.conf"]
