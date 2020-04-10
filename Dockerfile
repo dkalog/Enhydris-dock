@@ -42,13 +42,13 @@ CMD git clone  https://github.com/openmeteo/enhydris.git
 WORKDIR /home/foo/enhydris
 CMD git checkout master
 
+
 RUN virtualenv --python=/usr/bin/python3 /home/foo/enhydris
 RUN /home/foo/enhydris/bin/pip install psycopg2
 RUN /home/foo/enhydris/bin/pip install gdal==2.4.0
 RUN /home/foo/enhydris/bin/pip install -r requirements.txt
 RUN /home/foo/enhydris/bin/pip install -r requirements-dev.txt
-#RUN python3 manage.py makemigrations --check
-
+RUN /home/foo/enhydris/bin/pip install  isort flake8 black 
 
 # switch USER
 USER postgres
@@ -68,12 +68,12 @@ EXPOSE 5432
 # the postgis extension
 
 RUN    /etc/init.d/postgresql start &&\
-    psql --command "CREATE USER enhydris_user WITH SUPERUSER PASSWORD 'enhydris';" &&\
-    createdb -O enhydris_user enhydris_db &&\
-    psql -d enhydirs_user --command "CREATE EXTENSION IF NOT EXISTS postgis;" &&\
-    psql -d enhydirs_user --command "CREATE EXTENSION IF NOT EXISTS postgis_topology;" &&\
-    psql -d enhydirs_user --command "CREATE EXTENSION hstore;" &&\
-    psql -d enhydirs_user --command "CREATE SCHEMA import;"
+    psql --command "CREATE USER openmeteo WITH SUPERUSER PASSWORD 'openmeteo';" &&\
+    createdb -O openmeteo openmeteo &&\
+    psql -d openmeteo --command "CREATE EXTENSION IF NOT EXISTS postgis;" &&\
+    psql -d openmeteo --command "CREATE EXTENSION IF NOT EXISTS postgis_topology;" &&\
+    psql -d openmeteo --command "CREATE EXTENSION hstore;" &&\
+    psql -d openmeteo --command "CREATE SCHEMA import;"
 
 
 # Add VOLUMEs to allow backup of config, logs and databases
@@ -81,3 +81,9 @@ VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql", "/home
 
 # Set the default command to run when starting the container
 CMD ["/usr/lib/postgresql/11/bin/postgres", "-D", "/var/lib/postgresql/11/main", "-c", "config_file=/etc/postgresql/11/main/postgresql.conf"]
+#
+
+USER root
+RUN /home/foo/enhydris/bin/pip install  pillow
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y libfreetype6-dev python3-pil
+RUN /home/foo/enhydris/bin/python manage.py makemigrations --check
