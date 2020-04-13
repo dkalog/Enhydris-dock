@@ -19,6 +19,7 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" > /etc/
 #  and some other packages for ftp
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y \
   git virtualenv python3-virtualenv python3-pip python3-psycopg2 \
+  python3-dev libjpeg-dev libfreetype6-dev  python3-pil \
   software-properties-common \
   postgresql-11 \
   postgresql-client-11 \
@@ -77,7 +78,7 @@ RUN    /etc/init.d/postgresql start &&\
 
 
 # Add VOLUMEs to allow backup of config, logs and databases
-VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql", "/home/osmdata/gpkg"]
+VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
 
 # Set the default command to run when starting the container
 CMD ["/usr/lib/postgresql/11/bin/postgres", "-D", "/var/lib/postgresql/11/main", "-c", "config_file=/etc/postgresql/11/main/postgresql.conf"]
