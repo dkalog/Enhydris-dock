@@ -91,5 +91,5 @@ CMD ["/home/foo/enhydris/bin/python","manage.py","makemigrations","--check"]
 CMD ["/home/foo/enhydris/bin/python","manage.py"]
 
 EXPOSE 8000
-CMD ["/home/foo/enhydris/bin/python","manage.py","runserver","0.0.0.0:8000"]
+#CMD ["/home/foo/enhydris/bin/python","manage.py","runserver","0.0.0.0:8000"]
 
