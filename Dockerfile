@@ -68,21 +68,23 @@ EXPOSE 5432
 # then create a database `enhydris` owned by the ``enhydris`` role and add
 # the postgis extension
 
+
 RUN    /etc/init.d/postgresql start &&\
-    psql --command "CREATE USER openmeteo WITH SUPERUSER PASSWORD 'openmeteo';" &&\
+    psql --command "CREATE USER openmeteo WITH SUPERUSER PASSWORD 'topsecret';" &&\
     createdb -O openmeteo openmeteo &&\
     psql -d openmeteo --command "CREATE EXTENSION IF NOT EXISTS postgis;" &&\
-    psql -d openmeteo --command "CREATE EXTENSION IF NOT EXISTS postgis_topology;" &&\
-    psql -d openmeteo --command "CREATE EXTENSION hstore;" &&\
-    psql -d openmeteo --command "CREATE SCHEMA import;"
+    psql -d openmeteo --command "CREATE EXTENSION IF NOT EXISTS postgis_topology;" 
 
 
+COPY ./local.py /home/foo/enhydris/enhydris_project/settings
 # Add VOLUMEs to allow backup of config, logs and databases
-VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
+VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql", "home/foo"]
 
 # Set the default command to run when starting the container
-CMD ["/usr/lib/postgresql/11/bin/postgres", "-D", "/var/lib/postgresql/11/main", "-c", "config_file=/etc/postgresql/11/main/postgresql.conf"]
-#
-
+#RUN ["service", "postgresql", "start"]
 USER root
-RUN /home/foo/enhydris/bin/python manage.py makemigrations --check
+#CMD ["/usr/lib/postgresql/11/bin/postgres", "-D", "/var/lib/postgresql/11/main", "-c", "config_file=/etc/postgresql/11/main/postgresql.conf"]
+#
+ENTRYPOINT ["service","postgresql","start"]
+CMD ["/home/foo/enhydris/bin/python","manage.py","makemigrations","--check"]
+
