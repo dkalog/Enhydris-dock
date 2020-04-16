@@ -9,14 +9,6 @@ ENV PYTHONUNBUFFERED 1
 # getting postgres
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y wget gnupg2 
 
-#RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
-
-# Add PostgreSQL's repository. It contains the most recent stable release
-#     of PostgreSQL, ``11``.
-#RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" > /etc/apt/sources.list.d/pgdg.list
-
-# Install software-properties-common and PostgreSQL 11
-#  and some other packages for ftp
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y \
   git virtualenv python3-virtualenv python3-pip python3-psycopg2 \
   python3-dev libjpeg-dev libfreetype6-dev  python3-pil \
@@ -68,7 +60,7 @@ EXPOSE 8000
 
 
 RUN    /etc/init.d/postgresql start &&\
-    psql --command "CREATE USER openmeteo WITH SUPERUSER PASSWORD 'topsecret';" &&\
+    psql --command "CREATE USER openmeteo WITH PASSWORD 'topsecret';" &&\
     createdb -O openmeteo openmeteo &&\
     psql -d openmeteo --command "CREATE EXTENSION IF NOT EXISTS postgis;" &&\
     psql -d openmeteo --command "CREATE EXTENSION IF NOT EXISTS postgis_topology;" 
