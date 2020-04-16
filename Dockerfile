@@ -1,5 +1,4 @@
 # use of an ubuntu base for simplicity and transparency
-#FROM ubuntu:18.04
 FROM python:3.7-slim-buster
 # set environment variables
 ADD VERSION .
