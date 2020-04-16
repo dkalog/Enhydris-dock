@@ -1,7 +1,5 @@
 # flake8: NOQA
-​
 from . import *
-​
 DEBUG = True
 ALLOWED_HOSTS=["*"]
 DATABASES = {
