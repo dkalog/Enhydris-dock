@@ -75,6 +75,8 @@ RUN    /etc/init.d/postgresql start &&\
 
 
 COPY ./local.py /home/foo/enhydris/enhydris_project/settings
+#ADD ./start.sh /home/foo/enhydris
+#RUN chmod +x ./start.sh
 # Add VOLUMEs to allow backup of config, logs and databases
 VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql", "/home/foo"]
 
@@ -87,11 +89,11 @@ USER root
 #CMD ["service","postgresql","start"]
 #CMD ["/home/foo/enhydris/venv/bin/python","./manage.py","makemigrations","--check"]
 
-#CMD ["/home/foo/enhydris/venv/bin/python","./manage.py"]
+#CMD ["/home/foo/enhydris/venv/bin/python","./manage.py migrate"]
 
 #CMD ["/home/foo/enhydris/venv/bin/python","./manage.py","runserver","0.0.0.0:8000"]
-ADD start.sh /
-RUN chmod +x /start.sh
+ADD start.sh /home/foo/enhydris
+RUN chmod +x /home/foo/enhydris/start.sh
 
-CMD ["/start.sh"]
+CMD ["/home/foo/enhydris/start.sh"]
 
