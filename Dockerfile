@@ -65,24 +65,13 @@ RUN    /etc/init.d/postgresql start &&\
     psql -d openmeteo --command "CREATE EXTENSION IF NOT EXISTS postgis_topology;" 
 
 
-COPY ./local.py /home/foo/enhydris/enhydris_project/settings
-#ADD ./start.sh /home/foo/enhydris
-#RUN chmod +x ./start.sh
-# Add VOLUMEs to allow backup of config, logs and databases
 VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql", "/home/foo"]
+COPY ./local.py /home/foo/enhydris/enhydris_project/settings
 
 # Set the default command to run when starting the container
 #RUN ["service", "postgresql", "start"]
 USER root
-#CMD ["/usr/lib/postgresql/11/bin/postgres", "-D", "/var/lib/postgresql/11/main", "-c", "config_file=/etc/postgresql/11/main/postgresql.conf"]
-#
-#ENTRYPOINT ["service","postgresql","start"]
-#CMD ["service","postgresql","start"]
-#CMD ["/home/foo/enhydris/venv/bin/python","./manage.py","makemigrations","--check"]
 
-#CMD ["/home/foo/enhydris/venv/bin/python","./manage.py migrate"]
-
-#CMD ["/home/foo/enhydris/venv/bin/python","./manage.py","runserver","0.0.0.0:8000"]
 ADD start.sh /home/foo/enhydris
 RUN chmod +x /home/foo/enhydris/start.sh
 
