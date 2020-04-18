@@ -58,11 +58,14 @@ EXPOSE 8000
 # the postgis extension
 
 
+ADD ./openmeteo.dump /home/foo/enhydris 
+
 RUN    /etc/init.d/postgresql start &&\
-    psql --command "CREATE USER openmeteo WITH PASSWORD 'topsecret';" &&\
+    psql --command "CREATE USER openmeteo WITH SUPERUSER PASSWORD 'topsecret';" &&\
     createdb -O openmeteo openmeteo &&\
     psql -d openmeteo --command "CREATE EXTENSION IF NOT EXISTS postgis;" &&\
-    psql -d openmeteo --command "CREATE EXTENSION IF NOT EXISTS postgis_topology;" 
+    psql -d openmeteo --command "CREATE EXTENSION IF NOT EXISTS postgis_topology;" &&\
+    psql -d openmeteo --command "\i /home/foo/enhydris/openmeteo.dump"
 
 
 VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql", "/home/foo"]
